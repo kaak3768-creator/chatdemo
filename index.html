@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ChatKu</title>
+<style>
+:root{--bg:#e9edef;--panel:#fff;--head:#f0f2f5;--text:#111b21;--sub:#667781;--line:#e4e7e9;--chat:#efeae2;--out:#d9fdd3;--in:#fff;--accent:#00a884;--hover:#f5f6f6;--err:#d93025}
+@media (prefers-color-scheme:dark){:root{--bg:#0b141a;--panel:#111b21;--head:#202c33;--text:#e9edef;--sub:#8696a0;--line:#222d34;--chat:#0b141a;--out:#005c4b;--in:#202c33;--hover:#202c33;--err:#ff7b72}}
+*{box-sizing:border-box;margin:0}
+html,body,#root{height:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+input{font:inherit;color:var(--text)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+#root{overflow:auto}
+.auth{min-height:100%;display:grid;place-items:center;padding:20px}
+.ac{width:100%;max-width:380px;background:var(--panel);border-radius:14px;padding:28px 24px;box-shadow:0 2px 14px rgba(0,0,0,.12)}
+.logo{width:56px;height:56px;border-radius:16px;background:linear-gradient(145deg,#2ee6b8,#007a62);display:grid;place-items:center;font-size:28px;margin:0 auto 10px;box-shadow:0 5px 0 #005a49}
+.ac h1{text-align:center;font-size:24px}
+.sub{text-align:center;color:var(--sub);font-size:14px;margin:4px 0 18px}
+.seg{display:flex;background:var(--head);border-radius:10px;padding:3px;margin-bottom:14px}
+.seg button{flex:1;padding:8px;border-radius:8px;font-weight:600;color:var(--sub)}
+.seg button.on{background:var(--panel);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+label{display:block;font-size:13px;font-weight:600;margin-bottom:12px}
+.fld{width:100%;margin-top:5px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:11px 12px;font-size:15px}
+.hint{font-weight:400;color:var(--sub);font-size:12px;margin-top:4px;display:block}
+.err{min-height:20px;color:var(--err);font-size:13px;margin-bottom:8px}
+.primary{width:100%;background:linear-gradient(#10c9a0,#00876c);color:#fff;padding:12px;border-radius:10px;font-weight:600;font-size:15px;box-shadow:0 3px 0 #00624e}
+.primary:active{transform:translateY(2px);box-shadow:0 1px 0 #00624e}
+.ghost{padding:10px 16px;border-radius:10px;background:var(--head)}
+.app{display:flex;height:100%;max-width:1200px;margin:0 auto;background:var(--panel);box-shadow:0 0 0 1px var(--line);overflow:hidden}
+.side{width:360px;border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+.bar{height:60px;padding:0 12px;display:flex;align-items:center;gap:10px;background:var(--head)}
+.bar h1{font-size:19px;flex:1}
+.av{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:600;color:#fff;flex:none;position:relative}
+.av.on::after{content:"";position:absolute;right:0;bottom:0;width:11px;height:11px;border-radius:50%;background:#25d366;border:2px solid var(--panel)}
+.add{display:flex;gap:6px;padding:10px 12px}
+.add input{flex:1;min-width:0;border:0;border-radius:8px;padding:9px 12px;background:var(--head);font-size:14px}
+.go{background:var(--accent);color:#fff;padding:0 14px;border-radius:8px;font-weight:600;font-size:14px}
+.list{overflow-y:auto;flex:1;min-height:0}
+.item{display:flex;gap:12px;padding:11px 14px;width:100%;text-align:left;align-items:center}
+.item:hover,.item.sel{background:var(--hover)}
+.meta{flex:1;min-width:0;border-bottom:1px solid var(--line);padding-bottom:11px}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.time{font-size:12px;color:var(--sub);white-space:nowrap}
+.last{font-size:14px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{background:var(--accent);color:#fff;border-radius:10px;font-size:12px;min-width:20px;padding:1px 6px;text-align:center}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;background:var(--chat)}
+.mh{height:60px;padding:0 10px;display:flex;align-items:center;gap:10px;background:var(--head)}
+.who{flex:1;min-width:0}
+.st{font-size:12.5px;color:var(--sub)}
+.back{display:none;width:38px;height:38px;font-size:22px}
+.msgs{flex:1;min-height:0;overflow-y:auto;padding:16px 8%;display:flex;flex-direction:column;gap:3px}
+.day{align-self:center;background:var(--head);color:var(--sub);font-size:12px;padding:4px 10px;border-radius:8px;margin:8px 0}
+.b{max-width:75%;padding:6px 9px 4px;border-radius:8px;font-size:14.5px;line-height:1.35;box-shadow:0 1px 1px rgba(0,0,0,.12);overflow-wrap:anywhere;white-space:pre-wrap}
+.b.in{align-self:flex-start;background:var(--in)}
+.b.out{align-self:flex-end;background:var(--out)}
+.ft{font-size:11px;color:var(--sub);text-align:right;margin-top:2px}
+.comp{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--head)}
+.comp input{flex:1;border:0;border-radius:8px;padding:11px 14px;background:var(--panel);font-size:15px;min-width:0}
+.send{width:42px;height:42px;border-radius:50%;background:linear-gradient(#1fd9ae,#00876c);color:#fff;font-size:18px;box-shadow:0 3px 0 #00624e}
+.empty{flex:1;display:grid;place-items:center;text-align:center;color:var(--sub);padding:24px}
+.empty h2{color:var(--text);font-weight:500;margin-bottom:6px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;place-items:center;padding:16px;z-index:5}
+.modal.open{display:grid}
+.card{background:var(--panel);border-radius:14px;padding:22px;width:100%;max-width:380px}
+.card h2{font-size:18px;margin-bottom:12px}
+.btns{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--text);color:var(--panel);padding:9px 16px;border-radius:8px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:9;max-width:90vw}
+.toast.show{opacity:1}
+@media (max-width:760px){
+.side{width:100%}.main{display:none;width:100%}
+.app.chatting .side{display:none}.app.chatting .main{display:flex}
+.back{display:block}.msgs{padding:12px 10px}.b{max-width:85%}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div class="modal" id="mod"></div>
+<div class="toast" id="toast"></div>
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0/dist/umd/supabase.min.js"></script>
+<script>
+(function(){
+"use strict";
+var C=window.CHATKU||{},$=function(s){return document.querySelector(s)},root=$("#root"),mod=$("#mod");
+var COLORS=["#128c7e","#7e57c2","#e57373","#f59e0b","#0288d1","#6d4c41"];
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function color(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return COLORS[h%COLORS.length]}
+function toast(t){var e=$("#toast");e.textContent=t;e.classList.add("show");clearTimeout(toast.h);toast.h=setTimeout(function(){e.classList.remove("show")},2600)}
+function p2(n){return String(n).padStart(2,"0")}
+function fmtT(iso){var d=new Date(iso);return p2(d.getHours())+":"+p2(d.getMinutes())}
+function dayKey(iso){var d=new Date(iso);return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate()}
+function dayLabel(iso){var n=Date.now();if(dayKey(iso)===dayKey(n))return "Hari ini";if(dayKey(iso)===dayKey(n-864e5))return "Kemarin";var d=new Date(iso);return p2(d.getDate())+"/"+p2(d.getMonth()+1)+"/"+d.getFullYear()}
+function listT(iso){var n=Date.now();if(dayKey(iso)===dayKey(n))return fmtT(iso);if(dayKey(iso)===dayKey(n-864e5))return "Kemarin";var d=new Date(iso);return p2(d.getDate())+"/"+p2(d.getMonth()+1)}
+
+if(!C.SUPABASE_URL||!C.SUPABASE_ANON_KEY||/ISI_/.test(C.SUPABASE_URL+C.SUPABASE_ANON_KEY)){
+  root.innerHTML='<div class="auth"><div class="ac"><h1>Belum dikonfigurasi</h1><p class="sub">Buka file config.js, isi SUPABASE_URL dan SUPABASE_ANON_KEY, lalu muat ulang. Panduan lengkap ada di README.md.</p></div></div>';
+  return;
+}
+if(!window.supabase){root.innerHTML='<div class="auth"><div class="ac"><h1>Gagal memuat</h1><p class="sub">Library Supabase tidak bisa dimuat. Cek koneksi internet lalu muat ulang.</p></div></div>';return}
+var sb=window.supabase.createClient(C.SUPABASE_URL,C.SUPABASE_ANON_KEY);
+var DOM=C.EMAIL_DOMAIN||"chatku.app";
+var me=null,prof=null,people={},threads={},unread={},online={},cur=null,mode="login",busy=false,chans=[];
+
+function lrGet(id){try{return parseInt(localStorage.getItem("ck_lr_"+me+"_"+id),10)||0}catch(e){return 0}}
+function lrSet(id,v){try{localStorage.setItem("ck_lr_"+me+"_"+id,String(v))}catch(e){}}
+function last(id){var t=threads[id];return t&&t.length?t[t.length-1]:null}
+function other(m){return m.sender_id===me?m.receiver_id:m.sender_id}
+function push(id,m){var t=threads[id]=threads[id]||[];if(!t.some(function(x){return x.id===m.id}))t.push(m)}
+function recount(){unread={};Object.keys(threads).forEach(function(id){var lr=lrGet(id);unread[id]=threads[id].filter(function(m){return m.sender_id===id&&Date.parse(m.created_at)>lr}).length})}
+function markRead(id){var l=last(id);if(l)lrSet(id,Date.parse(l.created_at));unread[id]=0}
+function isOn(id){return !!online[id]}
+function avatar(p,sz){return '<span class="av'+(isOn(p.id)?" on":"")+'" style="background:'+color(p.username)+';width:'+sz+'px;height:'+sz+'px">'+esc((p.name||p.username)[0].toUpperCase())+'</span>'}
+
+/* ---------- AUTH ---------- */
+function showAuth(){
+  var reg=mode==="register",keep=$("#u")?$("#u").value:"";
+  root.innerHTML='<div class="auth"><div class="ac"><div class="logo">💬</div><h1>ChatKu</h1><p class="sub">'+(reg?"Buat akun untuk mulai mengobrol":"Masuk untuk membuka chat kamu")+'</p>'+
+  '<div class="seg"><button data-act="tab" data-v="login" class="'+(reg?"":"on")+'">Masuk</button><button data-act="tab" data-v="register" class="'+(reg?"on":"")+'">Daftar</button></div>'+
+  '<div class="err" id="err" role="alert"></div>'+
+  '<label>Username<input class="fld" id="u" maxlength="20" autocomplete="username" autocapitalize="none" spellcheck="false" value="'+esc(keep)+'">'+(reg?'<span class="hint">3–20 karakter: huruf kecil, angka, garis bawah</span>':"")+'</label>'+
+  '<label>Password<input class="fld" id="p" type="password" autocomplete="'+(reg?"new-password":"current-password")+'">'+(reg?'<span class="hint">Minimal 6 karakter</span>':"")+'</label>'+
+  (reg?'<label>Ulangi password<input class="fld" id="p2" type="password" autocomplete="new-password"></label>':"")+
+  '<button class="primary" data-act="submit">'+(reg?"Daftar":"Masuk")+'</button></div></div>';
+  var u=$("#u");if(u)u.focus();
+}
+function err(t){var e=$("#err");if(e)e.textContent=t}
+function mapErr(m){
+  m=m||"";
+  if(/invalid login/i.test(m))return "Username atau password salah.";
+  if(/already registered|already been registered/i.test(m))return "Username sudah dipakai. Coba yang lain.";
+  if(/database error/i.test(m))return "Username sudah dipakai atau formatnya tidak valid.";
+  if(/rate limit|too many/i.test(m))return "Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.";
+  if(/email.*invalid|invalid.*email/i.test(m))return "Domain email ditolak Supabase. Ganti EMAIL_DOMAIN di config.js (lihat README).";
+  return m;
+}
+async function submit(){
+  if(busy)return;
+  var u=$("#u").value.trim().toLowerCase(),p=$("#p").value;
+  if(!/^[a-z0-9_]{3,20}$/.test(u))return err("Username 3–20 karakter: huruf kecil, angka, atau garis bawah.");
+  if(p.length<6)return err("Password minimal 6 karakter.");
+  if(mode==="register"&&p!==$("#p2").value)return err("Ulangi password tidak sama.");
+  busy=true;err("Memproses…");
+  var email=u+"@"+DOM,r;
+  try{
+    r=mode==="register"
+      ?await sb.auth.signUp({email:email,password:p,options:{data:{username:u,name:u}}})
+      :await sb.auth.signInWithPassword({email:email,password:p});
+  }catch(e){busy=false;return err("Tidak bisa terhubung ke server. Cek internet dan config.js.")}
+  busy=false;
+  if(r.error)return err(mapErr(r.error.message));
+  if(!r.data.session)return err("Akun dibuat, tetapi Supabase meminta konfirmasi email. Matikan 'Confirm email' (lihat README).");
+  await boot(r.data.user);
+}
+async function logout(){
+  chans.forEach(function(c){sb.removeChannel(c)});chans=[];
+  await sb.auth.signOut();
+  me=null;prof=null;people={};threads={};unread={};online={};cur=null;mode="login";closeM();showAuth();
+}
+
+/* ---------- DATA ---------- */
+async function boot(user){
+  me=user.id;
+  var r=await sb.from("profiles").select("*").eq("id",me).single();
+  if(r.error||!r.data){toast("Profil tidak ditemukan. Pastikan supabase.sql sudah dijalankan.");await sb.auth.signOut();me=null;return showAuth()}
+  prof=r.data;
+  var cr=await sb.from("contacts").select("contact").eq("owner",me);
+  var ids=(cr.data||[]).map(function(x){return x.contact});
+  var mr=await sb.from("messages").select("*").or("sender_id.eq."+me+",receiver_id.eq."+me).order("created_at",{ascending:false}).limit(300);
+  var ms=(mr.data||[]).slice().reverse();
+  ms.forEach(function(m){var o=other(m);if(ids.indexOf(o)<0)ids.push(o)});
+  people={};
+  if(ids.length){var pr=await sb.from("profiles").select("id,username,name,about").in("id",ids);(pr.data||[]).forEach(function(p){people[p.id]=p})}
+  threads={};ms.forEach(function(m){push(other(m),m)});
+  recount();renderApp();subscribe();
+}
+function subscribe(){
+  chans.forEach(function(c){sb.removeChannel(c)});
+  var ch=sb.channel("inbox-"+me).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"receiver_id=eq."+me},function(p){onIncoming(p.new)})
+    .subscribe(function(s){if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")toast("Koneksi live bermasalah. Coba muat ulang halaman.")});
+  var pc=sb.channel("online",{config:{presence:{key:me}}});
+  pc.on("presence",{event:"sync"},function(){online=pc.presenceState();renderList();updSt()})
+    .subscribe(async function(s){if(s==="SUBSCRIBED")await pc.track({at:Date.now()})});
+  chans=[ch,pc];
+}
+async function onIncoming(m){
+  var o=m.sender_id;
+  if(!people[o]){var r=await sb.from("profiles").select("id,username,name,about").eq("id",o).single();if(!r.data)return;people[o]=r.data}
+  push(o,m);
+  if(cur===o){markRead(o);renderMsgs()}else{unread[o]=(unread[o]||0)+1;toast(people[o].name+": "+m.body.slice(0,50))}
+  renderList();
+}
+async function openChat(id){
+  cur=id;var a=$("#app");if(a)a.classList.add("chatting");
+  renderList();renderMain();
+  var r=await sb.from("messages").select("*").or("and(sender_id.eq."+me+",receiver_id.eq."+id+"),and(sender_id.eq."+id+",receiver_id.eq."+me+")").order("created_at").limit(500);
+  if(r.data&&cur===id)threads[id]=r.data;
+  markRead(id);renderMsgs();renderList();
+}
+async function send(){
+  var i=$("#inp");if(!i||!cur)return;
+  var t=i.value.trim();if(!t)return;
+  i.value="";
+  var r=await sb.from("messages").insert({sender_id:me,receiver_id:cur,body:t}).select().single();
+  if(r.error){i.value=t;return toast("Pesan gagal terkirim: "+r.error.message)}
+  push(cur,r.data);markRead(cur);renderMsgs();renderList();i.focus();
+}
+async function addContact(){
+  var i=$("#au"),u=i.value.trim().toLowerCase().replace(/^@/,"");if(!u)return;
+  if(u===prof.username)return toast("Itu akun kamu sendiri");
+  var r=await sb.from("profiles").select("id,username,name,about").eq("username",u).maybeSingle();
+  if(r.error)return toast("Gagal mencari: "+r.error.message);
+  if(!r.data)return toast("Username @"+u+" tidak ditemukan");
+  people[r.data.id]=r.data;
+  var w=await sb.from("contacts").upsert({owner:me,contact:r.data.id},{onConflict:"owner,contact",ignoreDuplicates:true});
+  if(w.error)return toast("Gagal menambah kontak: "+w.error.message);
+  i.value="";openChat(r.data.id);
+}
+
+/* ---------- RENDER ---------- */
+function renderApp(){
+  root.innerHTML='<div class="app" id="app"><aside class="side"><div class="bar"><button data-act="me" aria-label="Profil saya">'+avatar({id:me,username:prof.username,name:prof.name},42)+'</button><h1>ChatKu</h1></div>'+
+   '<div class="add"><input id="au" placeholder="Tambah kontak: ketik username" autocomplete="off" aria-label="Username kontak"><button class="go" data-act="add">Tambah</button></div>'+
+   '<div class="list" id="list"></div></aside><section class="main" id="main"></section></div>';
+  renderList();renderMain();
+}
+function renderList(){
+  var el=$("#list");if(!el)return;
+  var ids=Object.keys(people).sort(function(a,b){var la=last(a),lb=last(b);return (lb?Date.parse(lb.created_at):0)-(la?Date.parse(la.created_at):0)||people[a].name.localeCompare(people[b].name)});
+  if(!ids.length){el.innerHTML='<div class="empty" style="padding:40px 20px">Belum ada kontak.<br>Ketik username temanmu di atas, lalu klik Tambah.</div>';return}
+  el.innerHTML=ids.map(function(id){
+    var p=people[id],l=last(id),pv=l?(l.sender_id===me?"Kamu: ":"")+l.body:"Belum ada pesan";
+    return '<button class="item'+(cur===id?" sel":"")+'" data-act="open" data-id="'+id+'">'+avatar(p,46)+
+     '<span class="meta"><span class="row"><span class="name">'+esc(p.name)+'</span><span class="time">'+(l?listT(l.created_at):"")+'</span></span>'+
+     '<span class="row"><span class="last">'+esc(pv)+'</span>'+(unread[id]?'<span class="badge">'+unread[id]+'</span>':"")+'</span></span></button>';
+  }).join("");
+}
+function stText(p){return isOn(p.id)?"online":"@"+p.username}
+function updSt(){var s=$("#st");if(s&&cur&&people[cur])s.textContent=stText(people[cur])}
+function renderMain(){
+  var m=$("#main");if(!m)return;
+  var p=people[cur];
+  if(!p){m.innerHTML='<div class="empty"><div><h2>ChatKu</h2><p>Pilih kontak di kiri, atau tambah teman lewat username.</p></div></div>';return}
+  m.innerHTML='<div class="mh"><button class="back" data-act="back" aria-label="Kembali">←</button>'+avatar(p,40)+
+   '<div class="who"><div class="name">'+esc(p.name)+'</div><div class="st" id="st">'+esc(stText(p))+'</div></div></div>'+
+   '<div class="msgs" id="msgs"></div>'+
+   '<div class="comp"><input id="inp" placeholder="Ketik pesan" autocomplete="off" maxlength="2000" aria-label="Ketik pesan"><button class="send" data-act="send" aria-label="Kirim">➤</button></div>';
+  renderMsgs();
+  var i=$("#inp");if(i)i.focus({preventScroll:true});
+}
+function renderMsgs(){
+  var el=$("#msgs");if(!el||!cur)return;
+  var t=threads[cur]||[],h="",prev="";
+  if(!t.length)h='<div class="day">Belum ada pesan. Kirim pesan pertama.</div>';
+  t.forEach(function(m){
+    var k=dayKey(m.created_at);if(k!==prev){h+='<div class="day">'+dayLabel(m.created_at)+'</div>';prev=k}
+    h+='<div class="b '+(m.sender_id===me?"out":"in")+'">'+esc(m.body)+'<div class="ft">'+fmtT(m.created_at)+'</div></div>';
+  });
+  el.innerHTML=h;el.scrollTop=el.scrollHeight;
+}
+
+/* ---------- PROFIL ---------- */
+function modal(h){mod.innerHTML='<div class="card" role="dialog" aria-modal="true">'+h+'</div>';mod.classList.add("open")}
+function closeM(){mod.classList.remove("open");mod.innerHTML=""}
+function profileM(){
+  modal('<h2>Profil saya</h2><p class="sub" style="text-align:left;margin:0 0 12px">@'+esc(prof.username)+'</p>'+
+   '<label>Nama tampilan<input class="fld" id="pn" maxlength="30" value="'+esc(prof.name)+'"></label>'+
+   '<label>Info<input class="fld" id="pa" maxlength="80" value="'+esc(prof.about)+'"></label>'+
+   '<div class="btns"><button class="ghost" data-act="logout">Keluar</button><button class="ghost" data-act="closem">Batal</button><button class="primary" style="width:auto;padding:10px 18px" data-act="save">Simpan</button></div>');
+}
+async function saveProfile(){
+  var n=$("#pn").value.trim(),a=$("#pa").value.trim();
+  if(!n)return toast("Nama tidak boleh kosong");
+  var r=await sb.from("profiles").update({name:n,about:a}).eq("id",me).select().single();
+  if(r.error)return toast("Gagal menyimpan: "+r.error.message);
+  prof=r.data;closeM();renderApp();toast("Profil disimpan");
+}
+
+/* ---------- EVENTS ---------- */
+document.addEventListener("click",function(e){
+  if(e.target===mod){closeM();return}
+  var t=e.target.closest("[data-act]");if(!t)return;
+  var d=t.dataset;
+  switch(d.act){
+    case "tab":mode=d.v;showAuth();break;
+    case "submit":submit();break;
+    case "me":profileM();break;
+    case "save":saveProfile();break;
+    case "logout":logout();break;
+    case "closem":closeM();break;
+    case "add":addContact();break;
+    case "open":openChat(d.id);break;
+    case "back":cur=null;$("#app").classList.remove("chatting");renderList();renderMain();break;
+    case "send":send();break;
+  }
+});
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape")closeM();
+  if(e.key!=="Enter")return;
+  var id=e.target.id;
+  if(id==="inp"){e.preventDefault();send()}
+  else if(id==="au"){e.preventDefault();addContact()}
+  else if(id==="u"||id==="p"||id==="p2"){e.preventDefault();submit()}
+});
+
+/* ---------- START ---------- */
+sb.auth.getSession().then(function(r){
+  if(r.data&&r.data.session)boot(r.data.session.user);else showAuth();
+}).catch(function(){showAuth()});
+})();
+</script>
+</body>
+</html>
